@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#020e1f">
+  <title>Zeni Scripts — AI Content Script Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Nunito:wght@400;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #020e1f;
+      --surface: rgba(5,30,60,0.75);
+      --border: rgba(56,160,220,0.2);
+      --accent: #38d4ff;
+      --accent2: #00f0b5;
+      --accent3: #5b8fff;
+      --text: #e8f4ff;
+      --muted: #6ba8d4;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Ocean BG */
+    .ocean-bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: linear-gradient(180deg, #020e1f 0%, #041a35 40%, #082e5a 100%);
+    }
+    .ocean-bg::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -20%; right: -20%; height: 55%;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%,
+        rgba(56,212,255,0.08) 0%, transparent 70%);
+      animation: shimmer 8s ease-in-out infinite alternate;
+    }
+    @keyframes shimmer {
+      0%   { opacity: 0.5; transform: scaleX(1); }
+      100% { opacity: 1;   transform: scaleX(1.08); }
+    }
+
+    /* Waves */
+    .waves-wrap {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 25vh; z-index: 0; pointer-events: none;
+    }
+    .wave-svg { position: absolute; bottom: 0; width: 200%; }
+    .wave-svg.w1 { animation: waveScroll 9s linear infinite; opacity: 0.5; bottom: 6px; }
+    .wave-svg.w2 { animation: waveScroll 13s linear infinite reverse; opacity: 0.3; bottom: 0; }
+    @keyframes waveScroll { to { transform: translateX(-50%); } }
+
+    /* Hero card */
+    .card {
+      position: relative; z-index: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px 44px;
+      max-width: 540px;
+      width: 92%;
+      text-align: center;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(56,212,255,0.1);
+      animation: fadeUp 0.7s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo-icon {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin: 0 auto 20px;
+      box-shadow: 0 0 24px rgba(56,212,255,0.4);
+    }
+
+    .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 3px;
+      color: var(--accent2); text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 6vw, 44px);
+      font-weight: 900; line-height: 1.1;
+      letter-spacing: -0.5px;
+      margin-bottom: 14px;
+    }
+    h1 .a1 { color: var(--accent);  text-shadow: 0 0 20px rgba(56,212,255,0.5); }
+    h1 .a2 { color: var(--accent2); text-shadow: 0 0 20px rgba(0,240,181,0.5); }
+
+    p {
+      color: var(--muted);
+      font-size: 14px; line-height: 1.75;
+      margin-bottom: 32px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      color: #020e1f;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700; font-size: 14px;
+      padding: 13px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 0 20px rgba(56,212,255,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 32px rgba(56,212,255,0.5);
+    }
+
+    .badges {
+      display: flex; justify-content: center; gap: 10px;
+      flex-wrap: wrap; margin-top: 24px;
+    }
+    .badge {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      padding: 4px 12px; border-radius: 20px; letter-spacing: 1px;
+    }
+    .badge.b1 { border: 1px solid rgba(56,212,255,0.3); color: var(--accent); background: rgba(56,212,255,0.07); }
+    .badge.b2 { border: 1px solid rgba(0,240,181,0.3); color: var(--accent2); background: rgba(0,240,181,0.07); }
+    .badge.b3 { border: 1px solid rgba(91,143,255,0.3); color: var(--accent3); background: rgba(91,143,255,0.07); }
+  </style>
+</head>
+<body>
+
+  <div class="ocean-bg"></div>
+
+  <div class="waves-wrap">
+    <svg class="wave-svg w1" viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z" fill="rgba(56,212,255,0.06)"/>
+    </svg>
+    <svg class="wave-svg w2" viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,50 C360,10 720,70 1080,30 C1260,10 1380,50 1440,40 L1440,80 L0,80 Z" fill="rgba(56,212,255,0.04)"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <div class="logo-icon">✦</div>
+    <div class="eyebrow">AI Powered · Multilingual</div>
+    <h1>
+      <span class="a1">Zeni</span> Scripts<br>
+      <span class="a2">v2</span>
+    </h1>
+    <p>
+      Generate engaging content scripts in <strong style="color:var(--text)">50+ languages</strong> instantly —
+      YouTube, Reels, Podcasts, Ads &amp; more. Powered by Claude AI.
+    </p>
+    <a href="zeni-scripts-v2.html" class="btn">🚀 Launch App</a>
+    <div class="badges">
+      <span class="badge b1">AI POWERED</span>
+      <span class="badge b2">50+ LANGUAGES</span>
+      <span class="badge b3">FREE TO USE</span>
+    </div>
+  </div>
+
+</body>
+</html>
